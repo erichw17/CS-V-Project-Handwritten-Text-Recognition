@@ -7,7 +7,7 @@ from sklearn.preprocessing import OneHotEncoder
 #import model
 
 IMAGE_SIZE = (128, 32)
-PREDICTED_SEQUENCE_LENGTH = 256
+PREDICTED_SEQUENCE_LENGTH = 254
 MAX_LEN = 53
 
 """Source code from https://github.com/githubharald/SimpleHTR/blob/master/src/SamplePreprocessor.py consulted"""
@@ -71,6 +71,28 @@ def encode_char(char):
         return (ord(char) - 62)
     else:
         return 2
+
+def numerical_decode(array):
+    message = ''
+    for i in array:
+        if i == 0:
+            message += ' '
+        elif i == 1:
+            message += '.'
+        elif 3 <= i and i <= 28:
+            message += chr((i+62))
+        else:
+            message += '*UNK*'
+    return message.strip(' ')
+
+def one_hot_decode(array):
+    message = ''
+    numerical = []
+    for row in array:
+        index = np.argmax(row)
+        numerical.append(index)
+
+    return numerical_decode(np.array(numerical))
 
 def string_encode(label):
     return np.array([encode_char(char) for char in list(label.ljust(MAX_LEN))])
@@ -139,6 +161,8 @@ def main():
     img_dir_path= "/Users/Sanjay/Documents/CS_V_Final_Project/data/words/a01"#a01-030x"#/a01-030x-02-07.png
     #"/Users/Sanjay/Documents/CS_V_Final_Project/data/words/a01/a01-030x/a01-030x-02-07.png
     label_path = '/Users/Sanjay/Documents/CS_V_Final_Project/data/words.txt'
+
+    print(numerical_decode([0, 1, 4, 5, 3, 5, 4,3,23, 43, 2]))
     #for i in range(0, 5): 
     #    print(preprocess(img_dir_path+'a01-000u-00-0'+str(i)+'.png'))
 
@@ -148,7 +172,7 @@ def main():
     #len_labels = [len(labels[label]) for label in labels]
     #print(max(len_labels))
     #print(nested_list_dir(img_dir_path)[0:10])
-    print(get_data(label_path, img_dir_path=img_dir_path, imgs_to_labels=True))
+    #print(get_data(label_path, img_dir_path=img_dir_path, imgs_to_labels=True))
 
 if __name__ == "__main__":
     main()
