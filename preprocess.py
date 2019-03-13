@@ -75,7 +75,7 @@ def encode_char(char):
 def numerical_decode(array):
     message = ''
     for i in array:
-        if i == 0:
+        if i == 0 or i == -1:
             message += ' '
         elif i == 1:
             message += '.'

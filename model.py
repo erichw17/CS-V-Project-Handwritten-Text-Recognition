@@ -7,12 +7,14 @@ import sys
 import os
 import numpy as np
 import preprocess
+import argparse
 
 
 #CHANGE LABEL_PATH AND IMG_DIR_PATH TO PATHS USED FOR LOCAL DIRECTORY
 
-IMG_DIR_PATH = '/Users/Sanjay/Documents/CS_V_Final_Project/data/words/a01/a01-000u'
-LABEL_PATH = '/Users/Sanjay/Documents/CS_V_Final_Project/data/words.txt'
+PATH_BASE = '/Users/Sanjay/Documents/CS_V_Final_Project/'
+IMG_DIR_PATH = PATH_BASE + 'data/words/a01/a01-000u'
+LABEL_PATH = PATH_BASE + 'data/words.txt'
 IMG_SIZE = (1, 128, 32)
 BATCH_SIZE = 500
 HIDDEN_SIZE = 100
@@ -90,7 +92,7 @@ class SimpleHTR():
         out = self.model.predict({'input': imgs})
         out = out[:, 2:, :]
 
-        #print(out)
+        print(out)
 
         return K.get_value(K.ctc_decode(out, input_length=np.ones(out.shape[0])*out.shape[1],
                          greedy=True)[0][0])
@@ -103,20 +105,28 @@ def ctc_lambda_func(args):
 
 
 def main():
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('mode', help='Mode in which to operate the neural net, \'train\' or \'test\'')
+    args = parser.parse_args()
+
     sess = tf.Session()
     with sess.as_default():
-        htr1 = SimpleHTR(mode='train', weights_file='weights.h5')
-        #htr_tiny = SimpleHTR(mode='test', weights_file='weights_tiny.h5')
+        #htr1 = SimpleHTR(mode='test', weights_file='weights_tiny.h5')
+        if (args.mode=='test'):
+            htr_tiny = SimpleHTR(mode='test', weights_file='weights_tiny.h5')
+            img_dir_path = "/Users/Sanjay/Documents/CS_V_Final_Project/data/words/a01/a01-000u"
+            responses = htr_tiny.predict(img_dir_path)
+            for row in responses:
+                print(preprocess.numerical_decode(row))
 
-        data = preprocess.get_data(LABEL_PATH, img_dir_path=IMG_DIR_PATH, imgs_to_labels=True, one_hot=False, return_list=True)
+        elif args.mode == 'train':
+            htr_tiny = SimpleHTR(mode='train', weights_file='weights_tiny.h5')
+            data = preprocess.get_data(LABEL_PATH, img_dir_path=IMG_DIR_PATH, imgs_to_labels=True, one_hot=False, return_list=True)
+            htr_tiny.train(data, epochs=200, out_file='weights_tiny.h5')
 
-        htr1.train(data, epochs=1, out_file='weights.h5')
-        #htr_tiny.train(data, epochs=30, out_file='weights_tiny.h5')
-        #img_dir_path = "/Users/Sanjay/Documents/CS_V_Final_Project/data/words/a01/a01-000u"
-
-        #print(htr_tiny.predict(img_dir_path).shape)
-        #print(K.get_value(K.ctc_decode(np.array([[[1, 0, 0, 0, 0],[0, 1, 0, 0, 0]]]), np.array([2,]))))
-        #print(htr1.predict(img_dir_path)[0][0].eval())
+        else:
+            raise InvalidArgumentError('No mode of operating neural net specified!')
 
 if __name__ == '__main__':
     main()
