@@ -8,13 +8,13 @@ import os
 import numpy as np
 import preprocess
 import argparse
-
+import datetime
 
 #CHANGE LABEL_PATH AND IMG_DIR_PATH TO PATHS USED FOR LOCAL DIRECTORY
 
-PATH_BASE = '/Users/Sanjay/Documents/CS_V_Final_Project/'
-IMG_DIR_PATH = PATH_BASE + 'data/words/a01/a01-000u'
-LABEL_PATH = PATH_BASE + 'data/words.txt'
+PATH_BASE = '/home/mlHTR1/'
+IMG_DIR_PATH = PATH_BASE + 'data/a01/'
+LABEL_PATH = PATH_BASE + 'words.txt'
 IMG_SIZE = (1, 128, 32)
 BATCH_SIZE = 500
 HIDDEN_SIZE = 100
@@ -108,6 +108,7 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('mode', help='Mode in which to operate the neural net, \'train\' or \'test\'')
+    parser.add_argument('-e', '--epochs', help='Number of epochs to train', type=int)
     args = parser.parse_args()
 
     sess = tf.Session()
@@ -115,7 +116,7 @@ def main():
         #htr1 = SimpleHTR(mode='test', weights_file='weights_tiny.h5')
         if (args.mode=='test'):
             htr_tiny = SimpleHTR(mode='test', weights_file='weights_tiny.h5')
-            img_dir_path = "/Users/Sanjay/Documents/CS_V_Final_Project/data/words/a01/a01-000u"
+            img_dir_path = "/home/mlHTR1/data/b01/b01-000"
             responses = htr_tiny.predict(img_dir_path)
             for row in responses:
                 print(preprocess.numerical_decode(row))
@@ -123,10 +124,12 @@ def main():
         elif args.mode == 'train':
             htr_tiny = SimpleHTR(mode='train', weights_file='weights_tiny.h5')
             data = preprocess.get_data(LABEL_PATH, img_dir_path=IMG_DIR_PATH, imgs_to_labels=True, one_hot=False, return_list=True)
-            htr_tiny.train(data, epochs=200, out_file='weights_tiny.h5')
-
+            htr_tiny.train(data, epochs=(args.epochs if args.epochs else 10), out_file='weights_tiny.h5')
+            f = open('training_log.txt', 'a+')
+            f.write('Training Complete: ' + str(datetime.datetime.now()))
+            f.close()
         else:
-            raise InvalidArgumentError('No mode of operating neural net specified!')
+            raise InvalidArgumentError('No valid mode of operating neural net specified!')
 
 if __name__ == '__main__':
     main()
