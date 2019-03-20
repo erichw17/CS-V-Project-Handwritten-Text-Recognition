@@ -1,16 +1,16 @@
+#!/usr/bin/python
+
 import sys
 import os
 import random
 import numpy as np
 import cv2
-from sklearn.preprocessing import OneHotEncoder
-#import model
 
 IMAGE_SIZE = (128, 32)
 PREDICTED_SEQUENCE_LENGTH = 254
 MAX_LEN = 53
 
-"""Source code from https://github.com/githubharald/SimpleHTR/blob/master/src/SamplePreprocessor.py consulted"""
+"""Source code derived from https://github.com/githubharald/SimpleHTR/blob/master/src/SamplePreprocessor.py consulted"""
 
 def preprocess(img_path):
 
@@ -43,6 +43,7 @@ def nested_list_dir(dir_path):
     for name in os.listdir(dir_path):
         if os.path.exists(dir_path + '/' + name):
             if not os.path.isdir(dir_path + '/' + name):
+                #print(name)
                 dirlist.append(name)
             else:
                 dirlist.extend([name + '/' + filename for filename in nested_list_dir(dir_path + '/' + name)])
@@ -56,6 +57,7 @@ def preprocess_batch(img_dir_path):
         try:
             img = preprocess(img_dir_path + '/' + filename)
             imgs[os.path.basename(filename).split('.')[0]] = img
+            #print(filename)
         except:
             pass
     return imgs
@@ -117,26 +119,34 @@ def get_data(label_path, img_dir_path=None, imgs_to_labels=False, one_hot=False,
             line = line.split(' ')
             if not one_hot:
                 labels[line[0]] = string_encode(line[-1].strip('\n'))
+                #print(labels[line[0]])
             else:
                 labels[line[0]] = one_hot_encode(line[-1].strip('\n'))
 
+    #print("Done!")
+                
     if img_dir_path == None:
         if imgs_to_labels:
             raise ValueError()
         else:
             return labels
     else:
+        #print(img_dir_path)
         assert os.path.isdir(img_dir_path)
         basenames = []
         for filename in nested_list_dir(img_dir_path):
             basename = os.path.basename(filename).split('.')[0]
             basenames.append(basename)
 
+        #print("Done!")
+            
         labels_subset = {}
         for basename in basenames:
             if basename in labels:
                 labels_subset[basename] = labels[basename]
 
+        #print("Done!")
+                
         if imgs_to_labels:
             img_labels = {}
             imgs = preprocess_batch(img_dir_path)
@@ -162,7 +172,9 @@ def main():
     #"/Users/Sanjay/Documents/CS_V_Final_Project/data/words/a01/a01-030x/a01-030x-02-07.png
     label_path = '/Users/Sanjay/Documents/CS_V_Final_Project/data/words.txt'
 
-    print(numerical_decode([0, 1, 4, 5, 3, 5, 4,3,23, 43, 2]))
+    get_data('/home/mlHTR1/words.txt', img_dir_path='/home/mlHTR1/data/', imgs_to_labels=True, return_list=True)
+    
+    #print(numerical_decode([0, 1, 4, 5, 3, 5, 4,3,23, 43, 2]))
     #for i in range(0, 5): 
     #    print(preprocess(img_dir_path+'a01-000u-00-0'+str(i)+'.png'))
 

@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from keras.models import Model
@@ -13,7 +15,7 @@ import datetime
 #CHANGE LABEL_PATH AND IMG_DIR_PATH TO PATHS USED FOR LOCAL DIRECTORY
 
 PATH_BASE = '/home/mlHTR1/'
-IMG_DIR_PATH = PATH_BASE + 'data/a01/'
+IMG_DIR_PATH = PATH_BASE + 'data/'
 LABEL_PATH = PATH_BASE + 'words.txt'
 IMG_SIZE = (1, 128, 32)
 BATCH_SIZE = 500
@@ -77,9 +79,11 @@ class SimpleHTR():
            print(self.model.summary())
 
         if weights_file != None:
-
-            self.model.load_weights(weights_file, by_name=True)
-
+            try:
+                self.model.load_weights(weights_file, by_name=True)
+            except:
+                print("Warning! Weights file does not exist! Neural net not initialized with weights!")
+                
     def train(self, data, batch_size=32, epochs=10, out_file=None):
         dataset_size = list(data.values())[0].shape[0]
         true_vals_dummy = np.zeros(dataset_size)
@@ -108,26 +112,27 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('mode', help='Mode in which to operate the neural net, \'train\' or \'test\'')
-    parser.add_argument('-e', '--epochs', help='Number of epochs to train', type=int)
+    parser.add_argument('-e', '--epochs', help='Number of epochs to train, default 10', type=int)
+    parser.add_argument('-w', '--weights', help='Optional pre-loaded weights')
     args = parser.parse_args()
 
     sess = tf.Session()
     with sess.as_default():
-        #htr1 = SimpleHTR(mode='test', weights_file='weights_tiny.h5')
+
         if (args.mode=='test'):
-            htr_tiny = SimpleHTR(mode='test', weights_file='weights_tiny.h5')
-            img_dir_path = "/home/mlHTR1/data/b01/b01-000"
-            responses = htr_tiny.predict(img_dir_path)
+            htr = SimpleHTR(mode='test', weights_file=(args.weights if args.weights else None))
+            test_dir_path = "/home/mlHTR1/data/a01/a01-000x"
+            responses = htr.predict(test_dir_path)
             for row in responses:
                 print(preprocess.numerical_decode(row))
 
         elif args.mode == 'train':
-            htr_tiny = SimpleHTR(mode='train', weights_file='weights_tiny.h5')
+            htr = SimpleHTR(mode='train', weights_file=(args.weights if args.weights else None))
             data = preprocess.get_data(LABEL_PATH, img_dir_path=IMG_DIR_PATH, imgs_to_labels=True, one_hot=False, return_list=True)
-            htr_tiny.train(data, epochs=(args.epochs if args.epochs else 10), out_file='weights_tiny.h5')
-            f = open('training_log.txt', 'a+')
-            f.write('Training Complete: ' + str(datetime.datetime.now()))
-            f.close()
+            htr.train(data, epochs=(args.epochs if args.epochs else 10), out_file=(args.weights if args.weights else None))
+            
+            print('\n*********************************\n Training Complete: ' + str(datetime.datetime.now()) + '\n*********************************\n\n')
+                            
         else:
             raise InvalidArgumentError('No valid mode of operating neural net specified!')
 
