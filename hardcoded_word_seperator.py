@@ -29,8 +29,9 @@ gaps = []
 halves = []
 for i in range(len(switches)-1):
     if sep[switches[i]-1]-sep[switches[i]] > 0:  # rather than -100, 100-0 signifies switch to blank space, while 0-100 signifies switch to words
-        halves += [(switches[i]+switches[i+1])/2]
-        gaps += [switches[i+1]-switches[i]]
+        if switches[i+1]-switches[i] > 25: # minimum distance between spaces to classify as word space = 25
+            halves += [(switches[i]+switches[i+1])/2]
+            gaps += [switches[i+1]-switches[i]]
 print(gaps)
 
 for half in halves:
