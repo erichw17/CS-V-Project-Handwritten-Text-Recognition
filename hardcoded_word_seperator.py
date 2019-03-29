@@ -26,22 +26,23 @@ for i in range(next.shape[0]):
         switches.append(i)
 
 gaps = []
-halves = []
+splits = []
 for i in range(len(switches)-1):
     if sep[switches[i]-1]-sep[switches[i]] > 0:  # rather than -100, 100-0 signifies switch to blank space, while 0-100 signifies switch to words
         if switches[i+1]-switches[i] > 25: # minimum distance between spaces to classify as word space = 25
-            halves += [(switches[i]+switches[i+1])/2]
+            splits.append([switches[i],switches[i+1]])
             gaps += [switches[i+1]-switches[i]]
-print(gaps)
-
-for half in halves:
-    plt.plot((half, half), (0, img.shape[0]), "b")
+#print(gaps)
+#print(splits)
+for split in splits:
+    plt.plot((split[0], split[0]), (0, img.shape[0]), "b")
+    plt.plot((split[1], split[1]), (0, img.shape[0]), "b")
 
 x = np.arange(width)
 
 plt.imshow(img, cmap=plt.cm.binary)
-plt.plot(x, maxes)
-plt.plot(x, means)
-plt.plot(x, mult)
-plt.plot(x, sep)
+#plt.plot(x, maxes)
+#plt.plot(x, means)
+#plt.plot(x, mult)
+#plt.plot(x, sep)
 plt.show()
