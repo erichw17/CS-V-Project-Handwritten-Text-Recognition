@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
-import os, random
+import os
+import random
 
 def cutAndSeparate(file_name):
     img = cv2.imread(file_name, cv2.IMREAD_GRAYSCALE)
@@ -89,8 +90,3 @@ def cutAndSeparate(file_name):
             break
 
     return edges, halves
-
-file_name = "data/forms/"+random.choice(os.listdir("data/forms/"))
-edges, halves = cutAndSeparate(file_name)
-print(edges)
-print(halves)
