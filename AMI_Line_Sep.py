@@ -3,8 +3,7 @@ import cv2
 import os
 import random
 
-def cutAndSeparate(file_name):
-    img = cv2.imread(file_name, cv2.IMREAD_GRAYSCALE)
+def cutAndSeparate(img):
     img = 255-np.array(img)
 
     size = img.shape[0]
