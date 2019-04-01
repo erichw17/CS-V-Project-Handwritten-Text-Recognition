@@ -5,11 +5,13 @@ import os
 import random
 import numpy as np
 import cv2
+import hunspell
+
 
 IMAGE_SIZE = (128, 32)
 PREDICTED_SEQUENCE_LENGTH = 254
 MAX_LEN = 53
-
+SPELL_CHECK = False
 """Source code derived from https://github.com/githubharald/SimpleHTR/blob/master/src/SamplePreprocessor.py consulted"""
 
 def preprocess(img_path):
@@ -84,9 +86,12 @@ def numerical_decode(array):
         elif 3 <= i and i <= 28:
             message += chr((i+62))
         else:
-            message += '*UNK*'
-    return message.strip(' ')
-
+            message += '_'
+    if SPELL_CHECK:
+        return spell_check(message.strip(' '))
+    else:
+        return message.strip(' ')
+        
 def one_hot_decode(array):
     message = ''
     numerical = []
@@ -98,6 +103,23 @@ def one_hot_decode(array):
 
 def string_encode(label):
     return np.array([encode_char(char) for char in list(label.ljust(MAX_LEN))])
+
+def spell_check(word):
+    word_file = open('/home/mlHTR1/data/big.txt', 'r')
+    word_list = word_file.read().upper().split(' ')
+    spellchecker = hunspell.HunSpell('/usr/share/hunspell/en_US.dic',
+                                 '/usr/share/hunspell/en_US.aff')
+    if not spellchecker.spell(word):
+        possibilities = spellchecker.suggest(word)
+        #print(possibilities)
+        word_possibility_dict = {}
+        for word in possibilities:
+            word_possibility_dict[word] = word_list.count(word)
+        vals = list(word_possibility_dict.values())
+        keys = list(word_possibility_dict.keys())
+        return keys[vals.index(max(vals))]
+    else:
+        return word
 
 def one_hot_encode(label):
     label = list(label.lower())
@@ -123,6 +145,7 @@ def get_data(label_path, img_dir_path=None, imgs_to_labels=False, one_hot=False,
             else:
                 labels[line[0]] = one_hot_encode(line[-1].strip('\n'))
 
+    #print(labels)
     #print("Done!")
                 
     if img_dir_path == None:
@@ -132,12 +155,17 @@ def get_data(label_path, img_dir_path=None, imgs_to_labels=False, one_hot=False,
             return labels
     else:
         #print(img_dir_path)
-        assert os.path.isdir(img_dir_path)
+        assert os.path.exists(img_dir_path)
         basenames = []
-        for filename in nested_list_dir(img_dir_path):
-            basename = os.path.basename(filename).split('.')[0]
-            basenames.append(basename)
+        if os.path.isdir(img_dir_path):
+            for filename in nested_list_dir(img_dir_path):
+                basename = os.path.basename(filename).split('.')[0]
+                basenames.append(basename)
 
+        else:
+            basenames.append(os.path.basename(img_dir_path).split('.')[0])
+                
+        #print(basenames)
         #print("Done!")
             
         labels_subset = {}
@@ -145,21 +173,32 @@ def get_data(label_path, img_dir_path=None, imgs_to_labels=False, one_hot=False,
             if basename in labels:
                 labels_subset[basename] = labels[basename]
 
+
+        #print(labels_subset)
         #print("Done!")
                 
         if imgs_to_labels:
+
             img_labels = {}
-            imgs = preprocess_batch(img_dir_path)
+            if (os.path.isdir(img_dir_path)):
+                imgs = preprocess_batch(img_dir_path)
+            elif (os.path.exists(img_dir_path)):
+                imgs = {}
+                imgs[basename] = preprocess(img_dir_path)
             for basename in labels_subset:
                 #print(basename)
                 try:
                     img_labels[basename] = [np.array(imgs[basename]), np.array(labels_subset[basename]), PREDICTED_SEQUENCE_LENGTH, np.array(labels_subset[basename]).shape[0]]
                 except KeyError:
                     pass
+            #print('error!')
+
+            #print(img_labels)
             if not return_list:
                 return img_labels
             else:
                 data_list = list(map(np.array, zip(*list(img_labels.values()))))
+                #print(data_list)
                 return {'input': data_list[0], 'labels': data_list[1], 'input_length': data_list[2], 'label_length': data_list[3]}
         else: 
             return labels_subset
