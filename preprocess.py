@@ -40,6 +40,31 @@ def preprocess(img_path):
 
     return img
 
+def preprocess_from_array(img):
+    
+    img = np.array(img)
+    #print(img)
+    #print(np.zeros(5))
+
+    (wt, ht) = IMAGE_SIZE
+    #print(IMAGE_SIZE)
+    (h, w) = img.shape
+    #print((w, h))
+    target = 255*np.ones([ht, wt])
+    s = max(w/wt, h/ht)
+    newSize = (max(min(wt, int(w / s)), 1), max(min(ht, int(h/s)), 1))
+    #print(newSize)
+    img = cv2.resize(img, newSize)
+    target[0:newSize[1], 0:newSize[0]] = img
+    
+    img = cv2.transpose(target)
+
+    mean, std = cv2.meanStdDev(img)
+    img = (img - mean) if std == 0 else (img - mean)/std
+    img = np.array(img, ndmin=3)
+
+    return img
+    
 def nested_list_dir(dir_path):
     dirlist = []
     for name in os.listdir(dir_path):

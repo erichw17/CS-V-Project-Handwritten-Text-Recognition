@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from keras.models import Model
 from keras.layers import Input, Lambda, TimeDistributed, Dropout, Permute, Reshape, LSTM, Conv2D, Dense, Activation, MaxPool2D, Flatten, Bidirectional
 from keras import backend as K
+from keras import regularizers
 import sys
 import os
 import numpy as np
@@ -24,6 +25,7 @@ ALPHABET_SIZE = 30
 INPUT_SEQUENCE_LENGTH = 256
 LABEL_LENGTHS = 53
 USE_DROPOUT = True
+USE_REGULARIZER = False
 
 class SimpleHTR():
 
@@ -52,9 +54,11 @@ class SimpleHTR():
         lstm1 = Bidirectional(LSTM(HIDDEN_SIZE, name='lstm1', return_sequences=True))(inner)
         lstm2 = Bidirectional(LSTM(HIDDEN_SIZE, name='lstm2', return_sequences=True))(lstm1)
         if USE_DROPOUT:
-            lstm2 = Dropout(0.3, name='dropout')(lstm2)
+            lstm2 = Dropout(0.1, name='dropout')(lstm2)
         time_dist = TimeDistributed(Dense(ALPHABET_SIZE), name='time_dist')(lstm2)
         inner2 = Dense(ALPHABET_SIZE, name='dense')(time_dist)
+        if USE_REGULARIZER:
+            inner2 = Dense(ALPHABET_SIZE, name='regularizer', kernel_regularizer=regularizers.l2(0.01))(inner2)
         y_pred = Activation('softmax', name='softmax')(inner2)
 
         assert mode == 'train' or mode == 'test'
@@ -76,7 +80,7 @@ class SimpleHTR():
         elif mode == 'test': 
 
            self.model = Model(inputs=[input_data], outputs=y_pred)
-           print(self.model.summary())
+           #print(self.model.summary())
 
         if weights_file != None:
             try:
@@ -87,7 +91,7 @@ class SimpleHTR():
     def train(self, data, batch_size=32, epochs=10, out_file=None):
         dataset_size = list(data.values())[0].shape[0]
         true_vals_dummy = np.zeros(dataset_size)
-        self.model.fit(x=data, y=true_vals_dummy, batch_size=batch_size, epochs=epochs, verbose=1)
+        self.model.fit(x=data, y=true_vals_dummy, validation_split=0.15,  batch_size=batch_size, epochs=epochs, verbose=1)
         if out_file != None:
             self.model.save_weights(out_file)
 
@@ -96,11 +100,17 @@ class SimpleHTR():
         out = self.model.predict({'input': imgs})
         out = out[:, 2:, :]
 
-        print(out)
+        #print(out)
 
         return K.get_value(K.ctc_decode(out, input_length=np.ones(out.shape[0])*out.shape[1],
-                         greedy=True)[0][0])
-    
+                                        greedy=True, beam_width=10, top_paths=2)[0][0])
+
+    def predict_from_array(self, imgs):
+        out = self.model.predict({'input': imgs})
+        out = out[:, 2:, :]
+
+        return K.get_value(K.ctc_decode(out, input_length=np.ones(out.shape[0])*out.shape[1],
+                                        greedy=True, beam_width=10, top_paths=2)[0][0])
 
 def ctc_lambda_func(args):
     y_pred, y_true, input_length, label_length = args
@@ -114,6 +124,8 @@ def main():
     parser.add_argument('mode', help='Mode in which to operate the neural net, \'train\' or \'test\'')
     parser.add_argument('-e', '--epochs', help='Number of epochs to train, default 10', type=int)
     parser.add_argument('-w', '--weights', help='Optional pre-loaded weights')
+    parser.add_argument('-d', '--data', help='directory of training data')
+    parser.add_argument('-t', '--test_data', help='directory of test data')
     args = parser.parse_args()
 
     sess = tf.Session()
@@ -121,14 +133,14 @@ def main():
 
         if (args.mode=='test'):
             htr = SimpleHTR(mode='test', weights_file=(args.weights if args.weights else None))
-            test_dir_path = "/home/mlHTR1/data/a01/a01-000x"
+            test_dir_path = "/home/mlHTR1/data/" + (args.test_data if args.test_data else 'a01/a01-000u')
             responses = htr.predict(test_dir_path)
             for row in responses:
                 print(preprocess.numerical_decode(row))
 
         elif args.mode == 'train':
             htr = SimpleHTR(mode='train', weights_file=(args.weights if args.weights else None))
-            data = preprocess.get_data(LABEL_PATH, img_dir_path=IMG_DIR_PATH, imgs_to_labels=True, one_hot=False, return_list=True)
+            data = preprocess.get_data(LABEL_PATH, img_dir_path=IMG_DIR_PATH+args.data, imgs_to_labels=True, one_hot=False, return_list=True)
             htr.train(data, epochs=(args.epochs if args.epochs else 10), out_file=(args.weights if args.weights else None))
             
             print('\n*********************************\n Training Complete: ' + str(datetime.datetime.now()) + '\n*********************************\n\n')
