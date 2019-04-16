@@ -18,8 +18,8 @@ def word_separator_from_array(img):
     mult = maxes*means/30
 
     sep = mult*1
-    sep[sep < 40] =  0
-    sep[sep >= 40] = 100
+    sep[sep < 20] =  0 #changed hardcode to 20 from 40; makes the threshold for visible black marks lower, can "see" lighter grey strokes
+    sep[sep >= 20] = 100
 
     next = np.roll(sep,1) #create new array shifted right by 1
     next = next != sep  #True if next_element is diff than sep_element at same index
