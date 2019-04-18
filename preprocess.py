@@ -5,7 +5,7 @@ import os
 import random
 import numpy as np
 import cv2
-import hunspell
+#import hunspell
 
 
 IMAGE_SIZE = (128, 32)
@@ -179,7 +179,7 @@ def get_data(label_path, img_dir_path=None, imgs_to_labels=False, one_hot=False,
         else:
             return labels
     else:
-        #print(img_dir_path)
+        print(img_dir_path)
         assert os.path.exists(img_dir_path)
         basenames = []
         if os.path.isdir(img_dir_path):

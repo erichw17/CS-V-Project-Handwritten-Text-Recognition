@@ -15,9 +15,9 @@ import datetime
 
 #CHANGE LABEL_PATH AND IMG_DIR_PATH TO PATHS USED FOR LOCAL DIRECTORY
 
-PATH_BASE = '/home/mlHTR1/'
-IMG_DIR_PATH = PATH_BASE + 'data/'
-LABEL_PATH = PATH_BASE + 'words.txt'
+PATH_BASE = '/Users/Sanjay/Documents/CS_V_Final_Project/'
+IMG_DIR_PATH = PATH_BASE + 'data/words/'
+LABEL_PATH = PATH_BASE + 'data/words.txt'
 IMG_SIZE = (1, 128, 32)
 BATCH_SIZE = 500
 HIDDEN_SIZE = 100
@@ -91,7 +91,7 @@ class SimpleHTR():
     def train(self, data, batch_size=32, epochs=10, out_file=None):
         dataset_size = list(data.values())[0].shape[0]
         true_vals_dummy = np.zeros(dataset_size)
-        self.model.fit(x=data, y=true_vals_dummy, validation_split=0.15,  batch_size=batch_size, epochs=epochs, verbose=1)
+        self.model.fit(x=data, y=true_vals_dummy, validation_split=0.0,  batch_size=batch_size, epochs=epochs, verbose=1)
         if out_file != None:
             self.model.save_weights(out_file)
 
@@ -133,7 +133,7 @@ def main():
 
         if (args.mode=='test'):
             htr = SimpleHTR(mode='test', weights_file=(args.weights if args.weights else None))
-            test_dir_path = "/home/mlHTR1/data/" + (args.test_data if args.test_data else 'a01/a01-000u')
+            test_dir_path = "/Users/Sanjay/Documents/CS_V_Final_Project/data/words/" + (args.test_data if args.test_data else 'a01/a01-000u')
             responses = htr.predict(test_dir_path)
             for row in responses:
                 print(preprocess.numerical_decode(row))
