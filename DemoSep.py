@@ -6,7 +6,12 @@ from IAM_Word_Sep import word_separator_from_array as WS
 from IAM_Line_Sep import cutAndSeparate as LS
 
 file_name = "data/forms/"+random.choice(os.listdir("data/forms/"))
-#file_name = 'data/forms/m06-091.png'#a05-029.png'
+#file_name = 'data/forms/a05-029.png'
+#file_name = 'data/forms/c06-039.png'
+#file_name = 'data/forms/c02-049.png'
+#file_name = 'data/forms/d06-086.png'
+#file_name = 'data/forms/c03-003e.png'
+file_name = 'data/forms/a05-022.png'
 print(file_name)
 
 img = cv2.imread(file_name, cv2.IMREAD_GRAYSCALE)

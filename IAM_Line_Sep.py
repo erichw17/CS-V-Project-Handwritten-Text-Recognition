@@ -79,14 +79,17 @@ def cutAndSeparate(img):
     edges[0] = e+10
 
     for maximum in maximums:
-        if maximum < edges[1] and mult[maximum] > 150:
+        if maximum < edges[1]-10 and maxes[maximum] > 180:
             e = maximum
     edges[1] = e
 
     for i in range(len(halves)):
         if halves[i] > edges[1]:
+            last = i
             edges[1] = halves[i-1]*2-halves[i-2]
             break
+
+    halves = halves[:last]
 
     rem = []
     for half in halves:
@@ -96,7 +99,7 @@ def cutAndSeparate(img):
     for r in rem:
         halves.remove(r)
 
-    if edges[1]-halves[-1] < 50:
-        halves = halves[:-1]
+    #if edges[1]-halves[-1] < 50:
+      #  halves = halves[:-1]
         
     return edges, halves
