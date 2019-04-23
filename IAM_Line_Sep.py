@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import numpy as np
 import cv2
 import os
@@ -90,4 +88,15 @@ def cutAndSeparate(img):
             edges[1] = halves[i-1]*2-halves[i-2]
             break
 
+    rem = []
+    for half in halves:
+        if half < edges[0] or half > edges[1]:
+            rem += [half]
+
+    for r in rem:
+        halves.remove(r)
+
+    if edges[1]-halves[-1] < 50:
+        halves = halves[:-1]
+        
     return edges, halves
