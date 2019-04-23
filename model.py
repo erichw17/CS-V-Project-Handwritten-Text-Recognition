@@ -146,7 +146,7 @@ def main():
 
         elif args.mode == 'train':
             htr = SimpleHTR(mode='train', weights_file=(args.weights if args.weights else None))
-            data = preprocess.get_data(LABEL_PATH, img_dir_path=IMG_DIR_PATH+args.data, imgs_to_labels=True, one_hot=False, return_list=True)
+            data = preprocess.get_data(LABEL_PATH, img_dir_path=(IMG_DIR_PATH+args.data if args.data else IMG_DIR_PATH), imgs_to_labels=True, one_hot=False, return_list=True)
             htr.train(data, epochs=(args.epochs if args.epochs else 10), out_file=(args.weights if args.weights else None))
             
             print('\n*********************************\n Training Complete: ' + str(datetime.datetime.now()) + '\n*********************************\n\n')
