@@ -48,22 +48,18 @@ def word_separator_from_array(img):
     for i in range(next.shape[0]):
         if next[i]: #get all moments, True, where element at index changes 
             switches.append(i)
-            
+                     
     words = []
-    tempFrontWord = 0 #considering if no gap between beginning of line and first word
+    tempFrontWord = left_margin #considering if no gap between beginning of line and first word
     for i in range(len(switches)):
-        if switches[i] >= left_margin - 20 and switches[i] <= right_margin + 20: #within bounds of edges
+        if switches[i] >= left_margin and switches[i] <= right_margin: #within bounds of edges
             sep_prev_minus_next = sep[switches[i]-1]-sep[switches[i]]
-            if i == 0 and sep_prev_minus_next < 0: # if gap between beginning of line and first word
-                tempFrontWord = switches[i]
-            elif sep_prev_minus_next > 0:  # rather than -100, 100-0 signifies switch to blank space, while 0-100 signifies switch to words
+            if sep_prev_minus_next > 0:  # rather than -100, 100-0 signifies switch to blank space, while 0-100 signifies switch to words
                 if i == len(switches)-1: # last index
                     words.append([tempFrontWord,switches[i]])
                 elif switches[i+1]-switches[i] > 25: # minimum distance between spaces to classify as word space = 25
                     words.append([tempFrontWord,switches[i]])
                     tempFrontWord = switches[i+1]
     if tempFrontWord > 0 and words[-1][0] != tempFrontWord: # if there is no gap at end of line, and tempFrontWord isn't being double counted
-        words.append([tempFrontWord, img.shape[1]])
+        words.append([tempFrontWord, right_margin])
     return words
-
-
