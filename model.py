@@ -12,7 +12,7 @@ import numpy as np
 import preprocess
 import argparse
 import datetime
-
+#a
 #CHANGE LABEL_PATH AND IMG_DIR_PATH TO PATHS USED FOR LOCAL DIRECTORY
 
 PATH_BASE = '/Users/Sanjay/Documents/CS_V_Final_Project/'
