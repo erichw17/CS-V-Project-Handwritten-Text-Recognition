@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
@@ -13,13 +11,13 @@ def word_separator_from_array(img):
     img = 255-np.array(img)
 
     width = img.shape[1]
-    maxes = np.max(img,axis=0)
-    means = np.mean(img,axis=0)
-    mult = maxes*means/30
-
+    maxes = np.max(img,axis=0).astype(np.int64)
+    means = np.mean(img,axis=0).astype(np.int64)
+    mult = maxes**2
+    
     sep = mult*1
-    sep[sep < 20] =  0 #changed hardcode to 20 from 40; makes the threshold for visible black marks lower, can "see" lighter grey strokes
-    sep[sep >= 20] = 100
+    sep[sep < 15000] =  0 #changed hardcode to 20 from 40; makes the threshold for visible black marks lower, can "see" lighter grey strokes
+    sep[sep >= 15000] = 100
 
     next = np.roll(sep,1) #create new array shifted right by 1
     next = next != sep  #True if next_element is diff than sep_element at same index
