@@ -15,15 +15,14 @@ def word_separator_from_array(img):
     right_margin_not_found = True
     left_margin = 0
     right_margin = 0
-    while left_margin_not_found and right_margin_not_found:
-        for i in range(len(col_mean)):
-            if col_mean[i] > 0:
-                if left_margin_not_found:
-                    left_margin = i
-                    left_margin_not_found = False
-                else:
-                    right_margin = i
-                    right_margin_not_found = False
+    for i in range(len(col_mean)):
+        if col_mean[i] > 0:
+            if left_margin_not_found:
+                left_margin = i
+                left_margin_not_found = False
+            else:
+                right_margin = i
+                right_margin_not_found = False
     #print(left_margin)
     #print(right_margin)
     #plt.subplot(121),plt.imshow(img,cmap = 'gray')
@@ -53,7 +52,7 @@ def word_separator_from_array(img):
     words = []
     tempFrontWord = 0 #considering if no gap between beginning of line and first word
     for i in range(len(switches)):
-        if switches[i] >= left_margin and switches[i] <= right_margin: #within bounds of edges
+        if switches[i] >= left_margin - 20 and switches[i] <= right_margin + 20: #within bounds of edges
             sep_prev_minus_next = sep[switches[i]-1]-sep[switches[i]]
             if i == 0 and sep_prev_minus_next < 0: # if gap between beginning of line and first word
                 tempFrontWord = switches[i]
@@ -66,3 +65,5 @@ def word_separator_from_array(img):
     if tempFrontWord > 0 and words[-1][0] != tempFrontWord: # if there is no gap at end of line, and tempFrontWord isn't being double counted
         words.append([tempFrontWord, img.shape[1]])
     return words
+
+
