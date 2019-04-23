@@ -19,10 +19,11 @@ PATH_BASE = '/Users/Sanjay/Documents/CS_V_Final_Project/'
 IMG_DIR_PATH = PATH_BASE + 'data/words/'
 LABEL_PATH = PATH_BASE + 'data/words.txt'
 IMG_SIZE = (1, 128, 32)
-BATCH_SIZE = 500
-HIDDEN_SIZE = 100
+BATCH_SIZE = 30
+NUM_RNNs = 1
+HIDDEN_SIZE = 200
 ALPHABET_SIZE = 30
-INPUT_SEQUENCE_LENGTH = 256
+INPUT_SEQUENCE_LENGTH = 150
 LABEL_LENGTHS = 53
 USE_DROPOUT = True
 USE_REGULARIZER = False
@@ -33,7 +34,7 @@ class SimpleHTR():
 
         kernels = [5, 5, 3, 3, 3]
         pools = [(2, 2), (2, 1), (2, 1), (2, 2), (2, 1)]
-        num_filters = [32, 64, 128, 128, 256]
+        num_filters = [4, 8, 16, 32, 150]
         num_layers = len(pools)
 
             #self.model = Sequential()
@@ -51,10 +52,15 @@ class SimpleHTR():
         inner = Flatten(name='flatten', data_format='channels_first')(conv)
         inner = Reshape((-1, 1), name='reshape')(inner)
         #self.model.add(Permute((2, 1)))
+        
         lstm1 = Bidirectional(LSTM(HIDDEN_SIZE, name='lstm1', return_sequences=True))(inner)
-        lstm2 = Bidirectional(LSTM(HIDDEN_SIZE, name='lstm2', return_sequences=True))(lstm1)
+        for i in range(NUM_RNNs - 1):
+            lstm1 = Bidirectional(LSTM(HIDDEN_SIZE, name=('lstm' + str(i)), return_sequences=True))(lstm1)
+        
+
+
         if USE_DROPOUT:
-            lstm2 = Dropout(0.1, name='dropout')(lstm2)
+            lstm2 = Dropout(0.1, name='dropout')(lstm1)
         time_dist = TimeDistributed(Dense(ALPHABET_SIZE), name='time_dist')(lstm2)
         inner2 = Dense(ALPHABET_SIZE, name='dense')(time_dist)
         if USE_REGULARIZER:
@@ -75,7 +81,7 @@ class SimpleHTR():
             self.model = Model(inputs=[input_data, y_true, input_length, label_length], outputs=loss_out)
 
             self.model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer='adam', metrics=['accuracy'])
-            #print(self.model.summary())
+            print(self.model.summary())
 
         elif mode == 'test': 
 
@@ -91,7 +97,7 @@ class SimpleHTR():
     def train(self, data, batch_size=32, epochs=10, out_file=None):
         dataset_size = list(data.values())[0].shape[0]
         true_vals_dummy = np.zeros(dataset_size)
-        self.model.fit(x=data, y=true_vals_dummy, validation_split=0.0,  batch_size=batch_size, epochs=epochs, verbose=1)
+        self.model.fit(x=data, y=true_vals_dummy, validation_split=0.1,  batch_size=batch_size, epochs=epochs, verbose=1)
         if out_file != None:
             self.model.save_weights(out_file)
 

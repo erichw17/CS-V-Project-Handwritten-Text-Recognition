@@ -9,7 +9,7 @@ import cv2
 
 
 IMAGE_SIZE = (128, 32)
-PREDICTED_SEQUENCE_LENGTH = 254
+PREDICTED_SEQUENCE_LENGTH = 148
 MAX_LEN = 53
 SPELL_CHECK = False
 """Source code derived from https://github.com/githubharald/SimpleHTR/blob/master/src/SamplePreprocessor.py consulted"""
