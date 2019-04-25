@@ -5,13 +5,13 @@ import os
 import random
 import numpy as np
 import cv2
-#import hunspell
+import hunspell
 
 
 IMAGE_SIZE = (128, 32)
 PREDICTED_SEQUENCE_LENGTH = 148
 MAX_LEN = 53
-SPELL_CHECK = False
+SPELL_CHECK = True
 """Source code derived from https://github.com/githubharald/SimpleHTR/blob/master/src/SamplePreprocessor.py consulted"""
 
 def preprocess(img_path):
@@ -130,7 +130,7 @@ def string_encode(label):
     return np.array([encode_char(char) for char in list(label.ljust(MAX_LEN))])
 
 def spell_check(word):
-    word_file = open('/home/mlHTR1/data/big.txt', 'r')
+    word_file = open('/home/mlHTR3/data/big.txt', 'r')
     word_list = word_file.read().upper().split(' ')
     spellchecker = hunspell.HunSpell('/usr/share/hunspell/en_US.dic',
                                  '/usr/share/hunspell/en_US.aff')

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -15,7 +15,7 @@ import datetime
 #a
 #CHANGE LABEL_PATH AND IMG_DIR_PATH TO PATHS USED FOR LOCAL DIRECTORY
 
-PATH_BASE = '/Users/Sanjay/Documents/CS_V_Final_Project/'
+PATH_BASE = '/home/mlHTR3/'
 IMG_DIR_PATH = PATH_BASE + 'data/words/'
 LABEL_PATH = PATH_BASE + 'data/words.txt'
 IMG_SIZE = (1, 128, 32)
@@ -103,13 +103,14 @@ class SimpleHTR():
 
     def predict(self, test_dir_path):
         imgs = preprocess.get_data(LABEL_PATH, test_dir_path, imgs_to_labels=True, one_hot=False, return_list=True)['input']
+        labels = preprocess.get_data(LABEL_PATH, test_dir_path, imgs_to_labels=True, one_hot=False, return_list=True)['labels']
         out = self.model.predict({'input': imgs})
         out = out[:, 2:, :]
 
         #print(out)
 
         return K.get_value(K.ctc_decode(out, input_length=np.ones(out.shape[0])*out.shape[1],
-                                        greedy=True, beam_width=10, top_paths=2)[0][0])
+                                        greedy=True, beam_width=10, top_paths=2)[0][0]), labels
 
     def predict_from_array(self, imgs):
         out = self.model.predict({'input': imgs})
@@ -139,11 +140,11 @@ def main():
 
         if (args.mode=='test'):
             htr = SimpleHTR(mode='test', weights_file=(args.weights if args.weights else None))
-            test_dir_path = "/Users/Sanjay/Documents/CS_V_Final_Project/data/words/" + (args.test_data if args.test_data else 'a01/a01-000u')
-            responses = htr.predict(test_dir_path)
-            for row in responses:
-                print(preprocess.numerical_decode(row))
-
+            test_dir_path = IMG_DIR_PATH + (args.test_data if args.test_data else 'a01/a01-000u')
+            responses, labels = htr.predict(test_dir_path)
+            for i in range(len(responses)):
+                print(preprocess.numerical_decode(responses[i]) + ' ---> ' + preprocess.numerical_decode(labels[i]))
+                
         elif args.mode == 'train':
             htr = SimpleHTR(mode='train', weights_file=(args.weights if args.weights else None))
             data = preprocess.get_data(LABEL_PATH, img_dir_path=(IMG_DIR_PATH+args.data if args.data else IMG_DIR_PATH), imgs_to_labels=True, one_hot=False, return_list=True)
