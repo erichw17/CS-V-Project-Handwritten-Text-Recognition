@@ -143,7 +143,7 @@ def main():
             test_dir_path = IMG_DIR_PATH + (args.test_data if args.test_data else 'a01/a01-000u')
             responses, labels = htr.predict(test_dir_path)
             for i in range(len(responses)):
-                print(preprocess.numerical_decode(responses[i]) + ' ---> ' + preprocess.numerical_decode(labels[i]))
+                print(preprocess.numerical_decode(responses[i]) + ' ---> ' + preprocess.numerical_decode(labels[i], should_spell_check=False))
                 
         elif args.mode == 'train':
             htr = SimpleHTR(mode='train', weights_file=(args.weights if args.weights else None))

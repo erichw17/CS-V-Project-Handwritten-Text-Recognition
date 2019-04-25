@@ -11,7 +11,7 @@ import hunspell
 IMAGE_SIZE = (128, 32)
 PREDICTED_SEQUENCE_LENGTH = 148
 MAX_LEN = 53
-SPELL_CHECK = True
+SPELL_CHECK = False
 """Source code derived from https://github.com/githubharald/SimpleHTR/blob/master/src/SamplePreprocessor.py consulted"""
 
 def preprocess(img_path):
@@ -101,7 +101,7 @@ def encode_char(char):
     else:
         return 2
 
-def numerical_decode(array):
+def numerical_decode(array, should_spell_check=SPELL_CHECK):
     message = ''
     for i in array:
         if i == 0 or i == -1:
@@ -112,7 +112,7 @@ def numerical_decode(array):
             message += chr((i+62))
         else:
             message += '_'
-    if SPELL_CHECK:
+    if should_spell_check:
         return spell_check(message.strip(' '))
     else:
         return message.strip(' ')
@@ -142,7 +142,10 @@ def spell_check(word):
             word_possibility_dict[word] = word_list.count(word)
         vals = list(word_possibility_dict.values())
         keys = list(word_possibility_dict.keys())
-        return keys[vals.index(max(vals))]
+        try:
+            return keys[vals.index(max(vals))]
+        except ValueError:
+            return word
     else:
         return word
 
