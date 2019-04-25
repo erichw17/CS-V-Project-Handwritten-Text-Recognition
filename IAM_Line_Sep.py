@@ -3,7 +3,7 @@ import cv2
 import os
 import random
 
-def cutAndSeparate(img):
+def cutAndSeparate(img, data=False):
     img = 255-np.array(img)
 
     size = img.shape[0]
@@ -101,5 +101,7 @@ def cutAndSeparate(img):
 
     #if edges[1]-halves[-1] < 50:
       #  halves = halves[:-1]
-        
+    if data:
+        return edges, halves, np.append(np.append(maxes, means), np.append(mult, SM))
+    
     return edges, halves
