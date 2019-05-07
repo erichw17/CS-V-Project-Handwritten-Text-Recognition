@@ -5,7 +5,7 @@ import os
 import random
 import numpy as np
 import cv2
-import hunspell
+#import hunspell
 
 
 IMAGE_SIZE = (128, 32)

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import model
+import model_original
 import preprocess
 import IAM_Line_Sep as lsep
 import IAM_Word_Sep as wsep
@@ -42,7 +42,7 @@ def parse_img(img_path):
 
     words = np.array(words)
 
-    htr = model.SimpleHTR(mode='test', weights_file='weights_tiny.h5')
+    htr = model_original.SimpleHTR(mode='test', weights_file='weights_tiny.h5')
     responses = htr.predict_from_array(words)
     for row in responses:
         decoded_row = preprocess.numerical_decode(row)
