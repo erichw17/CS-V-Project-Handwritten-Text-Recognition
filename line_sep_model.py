@@ -51,7 +51,7 @@ model.compile(loss='mean_squared_error',
 
 print(model.summary())
 
-history = model.fit(data, labels, batch_size=400, epochs=40, validation_split=0.2, verbose=1)
+history = model.fit(data, labels, batch_size=400, epochs=250, validation_split=0.2, verbose=1)
 
 model.save('sep_model.h5')
 
