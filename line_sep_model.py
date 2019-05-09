@@ -45,15 +45,18 @@ model.add(layers.Dense(1000, activation='relu'))
 model.add(layers.Dense(600, activation='relu'))
 model.add(layers.Dense(1))
 
-model.compile(loss='mean_absolute_error',
-              optimizer=tf.keras.optimizers.Adam(lr=.0005, decay=.01))
+model.compile(loss='mean_squared_error',
+              optimizer=tf.keras.optimizers.Adam(lr=.0007, decay=.01),
+              metrics=['mean_absolute_error'])
 
 print(model.summary())
 
-history = model.fit(data, labels, batch_size=400, epochs=250, validation_split=0.2, verbose=1)
+history = model.fit(data, labels, batch_size=400, epochs=40, validation_split=0.2, verbose=1)
 
-plt.plot(history.history['loss'])
-plt.plot(history.history['val_loss'])
+model.save('sep_model.h5')
+
+plt.plot(history.history['mean_absolute_error'][2:])
+plt.plot(history.history['val_mean_absolute_error'][2:])
 plt.show()
 
 
