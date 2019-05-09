@@ -102,6 +102,6 @@ def cutAndSeparate(img, data=False):
     #if edges[1]-halves[-1] < 50:
       #  halves = halves[:-1]
     if data:
-        return edges, halves, np.append(np.append(maxes, means), np.append(mult, SM))
+        return edges, halves, np.array([maxes, means, mult, SM])
     
     return edges, halves
