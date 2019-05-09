@@ -15,7 +15,7 @@ import datetime
 #a
 #CHANGE LABEL_PATH AND IMG_DIR_PATH TO PATHS USED FOR LOCAL DIRECTORY
 
-PATH_BASE = '/home/mlHTR3/'
+PATH_BASE = '/Users/Sanjay/Documents/CS_V_Final_Project/'
 IMG_DIR_PATH = PATH_BASE + 'data/words/'
 LABEL_PATH = PATH_BASE + 'data/words.txt'
 IMG_SIZE = (1, 128, 32)
