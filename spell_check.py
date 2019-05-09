@@ -25,8 +25,8 @@ class SimpleSpellCheck():
 
         self.weights_file = weights_file
         self.model = Sequential()
-        self.model.add
-        self.model.add(LSTM(HIDDEN_SIZE, name='lstm_input', input_shape=(OUTPUT_LEN, ALPHABET_SIZE), return_sequences=False))
+        self.model.add(LSTM(HIDDEN_SIZE, name='lstm_input', input_shape=(OUTPUT_LEN, ALPHABET_SIZE), return_sequences=True))
+        self.model.add(LSTM(HIDDEN_SIZE, name='lstm_next', return_sequences=False))
         self.model.add(Dropout(0.1, name='dropout_input'))
         self.model.add(RepeatVector(OUTPUT_LEN))
         self.model.add(LSTM(HIDDEN_SIZE, name='lstm_output', return_sequences=True))
@@ -44,7 +44,7 @@ class SimpleSpellCheck():
         
     def train(self, x, y, num_epochs=50):
         print(self.model.summary())
-        self.model.fit(x, y, epochs=num_epochs)
+        self.model.fit(x, y, epochs=num_epochs, batch_size=32)
         self.model.save_weights(self.weights_file)
         #print(self.model.summary())
 
@@ -60,11 +60,18 @@ class SimpleSpellCheck():
 def prepare_data(data_dir_path, weights=None, out_file_path=None):
     htr = model_new.SimpleHTR(mode='test', weights_file=weights)
     responses, labels = htr.predict(data_dir_path)
-    responses = np.array(list(map(lambda x: preprocess.one_hot_encode(preprocess.numerical_decode(x).ljust(OUTPUT_LEN)), responses)))
+    responses = np.array(np.array([np.array(preprocess.one_hot_encode(preprocess.numerical_decode(x)[:OUTPUT_LEN].ljust(OUTPUT_LEN))) for x in responses]))
     #print(type(responses))
-    labels = np.array(list(map(lambda x: preprocess.one_hot_encode(preprocess.numerical_decode(x).ljust(OUTPUT_LEN)), labels)))
-    print(responses)
-    print(labels)
+    #print(type(responses[0]))
+    #print(type(responses[0][0]))
+    labels = np.array(np.array([np.array(preprocess.one_hot_encode(preprocess.numerical_decode(x)[:OUTPUT_LEN].ljust(OUTPUT_LEN))) for x in labels]))
+    print(type(labels))
+    print(type(labels[0]))
+    print(type(labels[0][0]))
+    print(np.shape(labels))
+    print(np.shape(responses))
+    #print(responses)
+    #print(labels)
     return responses, labels
 
 
@@ -90,15 +97,15 @@ def main():
     '''
     
     if (args.mode == 'train'):
-        spellcheck.train(labels, labels, num_epochs=(args.epochs if args.epochs else 10))
+        spellcheck.train(responses, labels, num_epochs=(args.epochs if args.epochs else 10))
     elif (args.mode == 'test'):
         #print(spellcheck.evaluate(responses, labels))
         words = spellcheck.predict(responses)
         for i in range(len(words)):
-            print(words)
-            print(labels)
+#            print(words)
+#            print(labels)
             print(str(preprocess.one_hot_decode(words[i])) + '  --->  ' + str(preprocess.one_hot_decode(labels[i])))
-            print(np.amax(words[i] - labels[i]))
+#            print(np.amax(words[i] - labels[i]))
 if __name__ == '__main__':
     main()
 
