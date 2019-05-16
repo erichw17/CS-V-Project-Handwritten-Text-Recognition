@@ -6,7 +6,7 @@ def word_seperator(img_path):
     img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
     return (word_separator_from_array(img))
     
-def word_separator_from_array(img):
+def word_separator_from_array(img,data=False):
 
     mean = np.mean(img).astype(np.int64) #above bc don't want to deal with 255-
     edges = cv2.Canny(img,2*mean/3,2*mean)
@@ -34,7 +34,7 @@ def word_separator_from_array(img):
     img = 255-np.array(img)
     #width = img.shape[1]
     maxes = np.max(img,axis=0).astype(np.int64)
-    #means = np.mean(img,axis=0).astype(np.int64)
+    means = np.mean(img,axis=0).astype(np.int64)
     mult = maxes**2   
     sep = mult*1
     sep[sep < 15000] =  0 #changed hardcode to 20 from 40; makes the threshold for visible black marks lower, can "see" lighter grey strokes
@@ -42,7 +42,7 @@ def word_separator_from_array(img):
 
     next = np.roll(sep,1) #create new array shifted right by 1
     next = next != sep  #True if next_element is diff than sep_element at same index
-    next = next.astype(int)*100 # convert next array to int 0 or 100
+     # convert next array to int 0 or 100
 
     switches = []
     for i in range(next.shape[0]):
@@ -62,4 +62,7 @@ def word_separator_from_array(img):
                     tempFrontWord = switches[i+1]
     if tempFrontWord > 0 and words[-1][0] != tempFrontWord: # if there is no gap at end of line, and tempFrontWord isn't being double counted
         words.append([tempFrontWord, right_margin])
+    if data:
+        test = np.array([maxes,means,mult,sep,next])
+        return words, test
     return words
