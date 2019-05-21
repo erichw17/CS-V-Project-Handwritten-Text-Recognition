@@ -15,14 +15,21 @@ def pred_next(model, data, end):
     d = np.expand_dims(d, axis=2)
     cut = model.predict(d)
     cut = int(cut)
+    if cut < 1:
+        print("warning: cut < 0")
+        cut = 1
     if abs(end-cut) < 100:
         return [cut]
     else:
         return [cut] + pred_next(model, data[:, cut:], end-cut)
 
-def separate_img(img):
+def cutAndSeparate(img, IAM):
     edges, halves, data = sep(img, data=True)
-
+    print(edges)
+        
+    if not IAM:
+        edges = [0, img.shape[0]]
+    
     data = data[:, edges[0]:edges[1]]
 
     model = models.load_model("sep_model.h5")
