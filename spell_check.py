@@ -14,7 +14,7 @@ import model_new
 import argparse
 import datetime
 
-PATH_BASE = '/Users/Sanjay/Documents/CS_V_Final_Project/'
+PATH_BASE = '/home/mlHTR3/' #'/Users/Sanjay/Documents/CS_V_Final_Project/'
 HIDDEN_SIZE = 100
 OUTPUT_LEN = 15
 ALPHABET_SIZE = 29
@@ -44,7 +44,7 @@ class SimpleSpellCheck():
         
     def train(self, x, y, num_epochs=50):
         print(self.model.summary())
-        self.model.fit(x, y, epochs=num_epochs, batch_size=32)
+        self.model.fit(x, y, epochs=num_epochs, batch_size=32, validation_split=0.1)
         self.model.save_weights(self.weights_file)
         #print(self.model.summary())
 
@@ -85,9 +85,10 @@ def main():
     parser.add_argument('-t', '--test_data', help='directory of test data')
     args = parser.parse_args()
 
-    spellcheck = SimpleSpellCheck(weights_file=(PATH_BASE + args.weights if args.weights else None))
+    spellcheck = SimpleSpellCheck(weights_file=(PATH_BASE + 'mlHTR/' + args.weights if args.weights else None))
     #print(preprocess.one_hot_encode('abcdefgh'))
-    responses, labels = prepare_data(PATH_BASE + 'data/words/' + (args.data if args.data else 'a01/test'), weights=(PATH_BASE + 'weights_final_new.h5'))
+    print(PATH_BASE + 'mlHTR/' + 'weights_final_new.h5')
+    responses, labels = prepare_data(PATH_BASE + 'data/words/' + (args.data if args.data else ''), weights=(PATH_BASE + 'mlHTR/' + 'weights_final_new.h5'))
     
     '''
     responses_decoded = list(map(lambda x: preprocess.one_hot_decode(x), list(responses)))
