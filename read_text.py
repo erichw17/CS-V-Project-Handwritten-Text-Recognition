@@ -1,14 +1,18 @@
 #!/usr/bin/python
 
 import model_original
+import model_new
+import spell_check_1000 as spell_check
 import preprocess
-import IAM_Line_Sep as lsep
+import line_separator_nn as lsep
 import IAM_Word_Sep as wsep
 import sys
 import os
 import cv2
 import numpy as np
+from spell_check_1000 import OUTPUT_LEN
 
+PATH_BASE = '/home/mlHTR3/'
 
 def parse_img(img_path):
 
@@ -16,7 +20,7 @@ def parse_img(img_path):
     img = np.array(img)
     #print(img.shape)
 
-    edges, halves = lsep.cutAndSeparate(img)
+    edges, halves = lsep.cutAndSeparate(img, True)
 
     line_dividers = [(int(halves[i]) if (halves[i] > edges[0] and halves[i] < edges[1]) else None)  for i in range(len(halves))]
     #print(line_dividers)
@@ -42,17 +46,25 @@ def parse_img(img_path):
 
     words = np.array(words)
 
-    htr = model_original.SimpleHTR(mode='test', weights_file='weights_tiny.h5')
+    #htr = model_new.SimpleHTR(mode='test', weights_file='weights_final_new.h5')
+    #responses = htr.predict_from_array(words)
+    #print(responses)
+    htr = model_new.SimpleHTR(mode='test', weights_file='weights_final_new.h5')
     responses = htr.predict_from_array(words)
-    for row in responses:
-        decoded_row = preprocess.numerical_decode(row)
-        if (decoded_row != '_'):
-            print(decoded_row)
+    responses = np.array(np.array([np.array(preprocess.one_hot_encode(preprocess.numerical_decode(x)[:OUTPUT_LEN].ljust(OUTPUT_LEN))) for x in responses]))
+    #print(responses)
+
+    #spell_checker = spell_check.SimpleSpellCheck(weights_file='spell_check_weights_alternate_1000_2_no_dropout_all.h5')
+    #responses = spell_checker.predict(responses)
+    for i in range(len(responses)):
+        #decoded_row = preprocess.numerical_decode(row)
+        #if (decoded_row != '_'):
+        print(preprocess.one_hot_decode(responses[i]))
 
     
 def main():
 
-    parse_img('/Users/Sanjay/Documents/CS_V_Final_Project/data/forms/a01-000x.png')
+    parse_img(PATH_BASE + 'data/forms/a01-000x.png')
 
 if __name__ == "__main__":
     main()
