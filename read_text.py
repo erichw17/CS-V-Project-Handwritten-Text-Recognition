@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import datetime
 import argparse
 import model_original
 import model_new
@@ -17,9 +18,9 @@ from spell_check_1000 import OUTPUT_LEN
 
 PATH_BASE = '/Users/Sanjay/Documents/CS_V_Final_Project/'
 
-def parse_img(img_path, IAM):
+def parse_img(img_path, IAM, out_directory=None):
 
-    print(img_path)
+    #print(img_path)
 
     img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
     img = np.array(img)
@@ -52,7 +53,7 @@ def parse_img(img_path, IAM):
             try:
                 word_transpose = cv2.transpose(word)
                 word_edges = wsep.word_separator_from_array(word_transpose)
-                print(word_edges)
+                #print(word_edges)
                 word_transpose = word_transpose[:, word_edges[0][0]:word_edges[0][1]]
                 word = cv2.transpose(word_transpose)
             except:
@@ -67,8 +68,8 @@ def parse_img(img_path, IAM):
     #print(words)
 
     words = np.array(words)
-    plt.imshow(words[24].squeeze())
-    plt.show()
+    #plt.imshow(words[24].squeeze())
+    #plt.show()
     #cv2_sep.show_contours(words[0].squeeze())
     #htr = model_new.SimpleHTR(mode='test', weights_file='weights_final_new.h5')
     #responses = htr.predict_from_array(words)
@@ -80,10 +81,20 @@ def parse_img(img_path, IAM):
 
     spell_checker = spell_check.SimpleSpellCheck(weights_file='spell_check_weights_alternate_1000_2_no_dropout_all.h5')
     responses = spell_checker.predict(responses)
-    for i in range(len(responses)):
+    out_file_name =  os.path.join((out_directory if out_directory else ''), os.path.basename(img_path).split('.')[0] + '_DECODED.txt')
+    print(out_file_name)
+    with open(out_file_name, 'w') as f:
+        
+        f.write('******************************\n')
+        f.write('File ' + img_path + ' decoded on ' + str(datetime.datetime.now()) + ':\n\n')
+
+        for i in range(len(responses)):
         #decoded_row = preprocess.numerical_decode(row)
         #if (decoded_row != '_'):
-        print(preprocess.one_hot_decode(responses[i]))
+            f.write(preprocess.one_hot_decode(responses[i]) + ' ')
+
+        f.write('\n******************************\n')
+        f.close()
 
     
 def main():
@@ -91,10 +102,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--IAM', help='Use IAM data')
     parser.add_argument('-d', '--data', help='directory of data')
+    parser.add_argument('-o', '--out_directory', help='directory of output file')
     args = parser.parse_args()
 
     if (args.IAM):
-        parse_img(PATH_BASE + 'data/forms/' + (args.data if args.data else 'a01-000x') + '.png', args.IAM)
+        parse_img(PATH_BASE + 'data/forms/' + (args.data if args.data else 'a01-000x') + '.png', args.IAM, out_directory=args.out_directory)
     else:
         assert args.data
         parse_img(PATH_BASE + 'data/forms/' + args.data, args.IAM)
