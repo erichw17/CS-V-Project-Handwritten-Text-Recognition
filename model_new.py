@@ -11,11 +11,12 @@ import os
 import numpy as np
 import preprocess
 import argparse
+import matplotlib.pyplot as plt
 import datetime
 #a
 #CHANGE LABEL_PATH AND IMG_DIR_PATH TO PATHS USED FOR LOCAL DIRECTORY
 
-PATH_BASE = '/home/mlHTR3/' #'/Users/Sanjay/Documents/CS_V_Final_Project/'
+PATH_BASE = '/Users/Sanjay/Documents/CS_V_Final_Project/'
 IMG_DIR_PATH = PATH_BASE + 'data/words/'
 LABEL_PATH = PATH_BASE + 'data/words.txt'
 IMG_SIZE = (1, 128, 32)
@@ -103,6 +104,10 @@ class SimpleHTR():
 
     def predict(self, test_dir_path):
         imgs = preprocess.get_data(LABEL_PATH, test_dir_path, imgs_to_labels=True, one_hot=False, return_list=True)['input']
+        img = imgs[0].squeeze()
+        print(img.shape)
+        plt.imshow(img)
+        plt.show()
         labels = preprocess.get_data(LABEL_PATH, test_dir_path, imgs_to_labels=True, one_hot=False, return_list=True)['labels']
         out = self.model.predict({'input': imgs})
         out = out[:, 2:, :]
