@@ -14,6 +14,7 @@ import model_new
 import argparse
 import datetime
 
+#Adjust PATH_BASE to local directory path
 PATH_BASE = '/Users/Sanjay/Documents/CS_V_Final_Project/'
 HIDDEN_SIZE = 1000
 OUTPUT_LEN = 15
@@ -23,7 +24,14 @@ NUM_RECURRENT_LAYERS = 1
 class SimpleSpellCheck():
 
     def __init__(self, mode='train', weights_file=None):
-
+        """
+        Create spell check model
+        
+        Keyword Arguments:
+        mode -- [DEPRECATED] mode of operating neural net (is not actually relevant to constructor)
+        weights_file -- pre-loaded weights for neural net
+        """
+        
         self.weights_file = weights_file
         self.model = Sequential()
         #self.model.add(LSTM(HIDDEN_SIZE, name='lstm_input', input_shape=(OUTPUT_LEN, ALPHABET_SIZE), return_sequences=True))
@@ -46,21 +54,53 @@ class SimpleSpellCheck():
                 print('Warning! Weights File Failed to Load! Neural Net Not Initialized with Weights!')
         
     def train(self, x, y, num_epochs=50):
+        """
+        Train neural net on input data
+        
+        Arguments:
+        x -- input data
+        y -- output labels
+
+        Keyword Arguments:
+        num_epochs -- number of epochs to train
+        """
         print(self.model.summary())
         self.model.fit(x, y, epochs=num_epochs, batch_size=32, validation_split=0.1)
         self.model.save_weights(self.weights_file)
         #print(self.model.summary())
 
     def predict(self, x):
+        """
+        Predict the output corresponding to given input data
+        
+        Arguments:
+        x -- input data
+        """
         words = self.model.predict(x)
         #words = list(map(lambda x: preprocess.one_hot_decode(x), x))
         return words
 
     def evaluate(self, x, y):
+        """
+        Evaluate loss metric on test set
+        
+        Arguments:
+        x -- input data
+        y -- output labels
+        """
         loss = self.model.evaluate(x, y)
         return loss
 
 def prepare_data(data_dir_path, weights=None, out_file_path=None):
+    """Prepare IAM data for input into spell check for training
+
+    Arguments:
+    data_dir_path -- directory of training data
+    
+    Keyword Arguments:
+    weights -- file containing pre-loaded weights for word reader neural net
+    out_file_path -- [DEPRECATED] argument specifying output file for data
+    """
     htr = model_new.SimpleHTR(mode='test', weights_file=weights)
     responses, labels = htr.predict(data_dir_path)
     responses = np.array(np.array([np.array(preprocess.one_hot_encode(preprocess.numerical_decode(x)[:OUTPUT_LEN].ljust(OUTPUT_LEN))) for x in responses]))
@@ -78,7 +118,9 @@ def prepare_data(data_dir_path, weights=None, out_file_path=None):
     return responses, labels
 
 def main():
-
+    """Method to run model using command line"""
+    
+    #Command line argument parser
     parser = argparse.ArgumentParser()
     parser.add_argument('mode', help='Mode in which to operate the neural net, \'train\' or \'test\'')
     parser.add_argument('-e', '--epochs', help='Number of epochs to train, default 10', type=int)
@@ -87,6 +129,7 @@ def main():
     parser.add_argument('-t', '--test_data', help='directory of test data')
     args = parser.parse_args()
 
+    #Initialize Spell Check neural net
     spellcheck = SimpleSpellCheck(weights_file=(PATH_BASE + args.weights if args.weights else None))
     #print(preprocess.one_hot_encode('abcdefgh'))
     print(PATH_BASE + 'mlHTR/' + 'weights_final_new.h5')
@@ -99,8 +142,11 @@ def main():
     print(labels_decoded)
     '''
     
+    #Train on data
     if (args.mode == 'train'):
         spellcheck.train(responses, labels, num_epochs=(args.epochs if args.epochs else 10))
+    
+    #Predict on test set
     elif (args.mode == 'test'):
         #print(spellcheck.evaluate(responses, labels))
         words = spellcheck.predict(responses)
