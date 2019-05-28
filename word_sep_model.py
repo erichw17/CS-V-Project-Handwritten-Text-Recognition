@@ -12,11 +12,12 @@ def main():
     model = models.Sequential()
     model.add(layers.MaxPooling1D(5, input_shape=(11350, 1)))
     model.add(layers.Flatten())
-    model.add(layers.Dense(4096, activation='relu'))
+    #model.add(layers.Dense(4096, activation='relu'))
     model.add(layers.Dense(2048, activation='relu'))
     model.add(layers.Dense(1024, activation='relu'))
     model.add(layers.Dense(512, activation='relu'))
     model.add(layers.Dense(256, activation='relu'))
+    model.add(layers.Dense(128, activation='relu'))
     model.add(layers.Dense(2))
     
     model.compile(loss='mean_squared_error',

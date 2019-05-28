@@ -22,7 +22,7 @@ def main():
     #dir = "data/lines/test1.png"
     img = cv2.imread(dir, cv2.IMREAD_GRAYSCALE)
     data = wsep(img,data=True)[1]
-    model = models.load_model('wsep_model_11-10-9-8_lr001.h5')
+    model = models.load_model('wsep_model_12-11-10-9-8_lr001.h5')
     w_cuts = predict_next(model,data,data.shape[1])
     
     plt.imshow(255-np.array(img), cmap=plt.cm.binary)
@@ -38,7 +38,7 @@ def main():
     print(new_cuts)
 
 def predict_next(model,data,last):
-    partial_img = np.zeros([5, 2500])
+    partial_img = np.zeros([5, 2270])
     partial_img[:, :data.shape[1]] = data
     d = partial_img.flatten()
     d = np.expand_dims(d, axis=0)

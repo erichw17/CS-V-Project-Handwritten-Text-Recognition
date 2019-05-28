@@ -10,7 +10,7 @@ from IAM_Word_Sep import word_separator_from_array as wsep
 from tensorflow.keras import models
 
 def predict_next(model,data,last):
-    partial_img = np.zeros([5, 2500])
+    partial_img = np.zeros([5, 2270])
     partial_img[:, :data.shape[1]] = data
     d = partial_img.flatten()
     d = np.expand_dims(d, axis=0)
